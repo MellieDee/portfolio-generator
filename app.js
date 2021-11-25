@@ -1,8 +1,6 @@
-const inquirer = require('inquirer');
 const fs = require('fs');
+const inquirer = require('inquirer');
 const generatePage = require('./src/page-template');
-
-
 
 const promptUser = () => {
   return inquirer.prompt([
@@ -19,44 +17,33 @@ const promptUser = () => {
         }
       }
     },
-
     {
       type: 'input',
       name: 'github',
-      message: 'Enter your GitHub Username.(Required)',
+      message: 'Enter your GitHub Username (Required)',
       validate: githubInput => {
         if (githubInput) {
           return true;
         } else {
-          console.log('Please enter your GitHub name.')
+          console.log('Please enter your GitHub username!');
           return false;
         }
       }
     },
-
     {
       type: 'confirm',
       name: 'confirmAbout',
-      message: 'Would you like to add infor about yourself?',
+      message: 'Would you like to enter some information about yourself for an "About" section?',
       default: true
     },
-
     {
       type: 'input',
       name: 'about',
-      message: 'Provide some info:',
-      when: ({ confirmAbout }) => {
-        if (confirmAbout) {
-          return true;
-        } else {
-          return false;
-        }
-      }
+      message: 'Provide some information about yourself:',
+      when: ({ confirmAbout }) => confirmAbout
     }
-
   ]);
 };
-
 
 const promptProject = portfolioData => {
   console.log(`
@@ -64,7 +51,8 @@ const promptProject = portfolioData => {
 Add a New Project
 =================
 `);
-  //if there aren'talready projects, start an array
+
+  // If there's no 'projects' array property, create one
   if (!portfolioData.projects) {
     portfolioData.projects = [];
   }
@@ -74,16 +62,15 @@ Add a New Project
         type: 'input',
         name: 'name',
         message: 'What is the name of your project? (Required)',
-        validate: projectInput => {
-          if (projectInput) {
+        validate: nameInput => {
+          if (nameInput) {
             return true;
           } else {
-            console.log('Please enter your project name.');
+            console.log('You need to enter a project name!');
             return false;
           }
         }
       },
-
       {
         type: 'input',
         name: 'description',
@@ -92,16 +79,15 @@ Add a New Project
           if (descriptionInput) {
             return true;
           } else {
-            console.log('Please enter a description.');
+            console.log('You need to enter a project description!');
             return false;
           }
         }
       },
-
       {
         type: 'checkbox',
         name: 'languages',
-        message: 'What did you build this project with? (Check all that apply)',
+        message: 'What did you this project with? (Check all that apply)',
         choices: ['JavaScript', 'HTML', 'CSS', 'ES6', 'jQuery', 'Bootstrap', 'Node']
       },
       {
@@ -112,7 +98,7 @@ Add a New Project
           if (linkInput) {
             return true;
           } else {
-            console.log('Please enter your GitHub project link.');
+            console.log('You need to enter a project GitHub link!');
             return false;
           }
         }
@@ -132,32 +118,22 @@ Add a New Project
     ])
     .then(projectData => {
       portfolioData.projects.push(projectData);
-
       if (projectData.confirmAddProject) {
         return promptProject(portfolioData);
-
       } else {
-        //critical to return so can use in HTML
         return portfolioData;
       }
     });
 };
 
-
-
-//function calls:
 promptUser()
   .then(promptProject)
   .then(portfolioData => {
-
     const pageHTML = generatePage(portfolioData);
 
-    // fs.writeFile('./index.html', pageHTML, err => {
-    //   if (err) throw err;
+    fs.writeFile('./index.html', pageHTML, err => {
+      if (err) throw new Error(err);
 
-    //   console.log('Page created! Check out index.html in this directory to see it!');
-    // });
-
+      console.log('Page created! Check out index.html in this directory to see it!');
+    });
   });
-
-
